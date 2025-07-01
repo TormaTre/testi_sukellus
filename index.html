@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sukelluspöytäkirja</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Scripts with defer -->
+    <script defer src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Light mode */
+        body[data-theme="light"] {
+            background-color: #ffffff;
+            color: #000000;
+        }
+
+        /* Dark mode (default) */
+        body[data-theme="dark"] {
+            background-color: #343a40;
+            color: #ffffff;
+        }
+        body[data-theme="dark"] .container,
+        body[data-theme="dark"] .modal-content,
+        body[data-theme="dark"] .list-group-item,
+        body[data-theme="dark"] .form-control,
+        body[data-theme="dark"] .btn-light {
+            background-color: #495057;
+            color: #ffffff;
+            border-color: #6c757d;
+        }
+        body[data-theme="dark"] .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        body[data-theme="dark"] .btn-secondary {
+            background-color: #6c757d;
+            border-color: #6c757d;
+        }
+        body[data-theme="dark"] .btn-success {
+            background-color: #28a745;
+            border-color: #28a745;
+        }
+        body[data-theme="dark"] .btn-info {
+            background-color: #17a2b8;
+            border-color: #17a2b8;
+        }
+        body[data-theme="dark"] .form-control:focus {
+            background-color: #495057;
+            color: #ffffff;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.25rem rgba(0, 123, 255, 0.25);
+        }
+        body[data-theme="dark"] .modal-content {
+            border-color: #6c757d;
+        }
+
+        /* Existing styles */
+        body { padding: 20px; }
+        .dive-time { color: #28a745; font-size: 1.4em; }
+        .dive-time-warning { color: orange; font-size: 1.4em; }
+        .dive-time-over { color: red; font-size: 1.4em; }
+        .diver-row { margin-bottom: 10px; }
+        .trash-icon, .play-icon, .pause-icon, .resume-icon, .stop-icon {
+            cursor: pointer;
+            margin-left: 10px;
+            font-size: 2em;
+        }
+        .event-header { margin-bottom: 20px; }
+        .font-weight-bold { font-weight: bold; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .input-span { cursor: pointer; text-decoration: underline; }
+        .buddy-checkboxes { max-height: 100px; overflow-y: auto; }
+        #mixedGasInput { display: none; }
+        .required-label::after {
+            content: ' *';
+            color: red;
+        }
+        .required-note {
+            font-size: 0.9em;
+            color: red;
+        }
+        .surface-text {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 2em;
+        }
+        hr.diver-divider {
+            margin: 10px 0;
+            border-color: #6c757d;
+        }
+        body[data-theme="dark"] hr.diver-divider {
+            border-color: #adb5bd;
+        }
+        .version-text {
+            font-size: 0.8em;
+            color: #000000;
+            margin-top: 10px;
+            text-align: center;
+        }
+        body[data-theme="dark"] .version-text {
+            color: #ffffff;
+        }
+        .diver-name {
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        .small-btn {
+            font-size: 0.8em;
+        }
+        .bottom-buttons {
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .form-check.form-switch {
+            margin-bottom: 0;
+        }
+        .clock-time {
+            font-size: 1.2em;
+        }
+        .post-dive-data {
+            font-size: 1.2em;
+        }
+        .action-buttons {
+            margin-top: 5px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+        .action-buttons .surface-text {
+            font-size: 1.2em;
+            margin-left: 10px;
+        }
+
+        /* Responsive styles for small screens */
+        @media (max-width: 767.98px) {
+            /* Hide header row in event view */
+            #diverList .font-weight-bold {
+                display: none;
+            }
+            /* Stack columns vertically */
+            .diver-row .row {
+                flex-direction: column;
+            }
+            .diver-row .col-md-1, .diver-row .col-md-2, .diver-row .col-md-3 {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+            /* Increase dive time size (1.5x of 1.4em = 2.1em) */
+            .dive-time, .dive-time-warning, .dive-time-over {
+                font-size: 2.1em;
+            }
+            /* Adjust diver name and icons for better readability */
+            .diver-name {
+                font-size: 1.2em;
+            }
+            .trash-icon, .play-icon, .pause-icon, .resume-icon, .stop-icon {
+                font-size: 1.5em;
+            }
+            .surface-text {
+                font-size: 1.0em;
+            }
+            .clock-time {
+                font-size: 1.0em;
+            }
+            .post-dive-data {
+                font-size: 1.0em;
+            }
+            .action-buttons {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .action-buttons .surface-text {
+                font-size: 1.0em;
+            }
+        }
+    </style>
+</head>
+<body data-theme="dark">
+    <!-- Main View -->
+    <div id="mainView" class="container">
+        <h1>Sukelluspöytäkirja</h1>
+        <button class="btn btn-primary mb-3" id="newEventButton">Uusi Tapahtuma</button>
+        <h3>Aiemmat Tapahtumat</h3>
+        <ul id="eventList" class="list-group"></ul>
+        <div class="bottom-buttons">
+            <button class="btn btn-info small-btn" onclick="backupEvents()">Varmuuskopioi</button>
+            <label class="btn btn-secondary small-btn">
+                Palauta <input type="file" id="restoreInput" accept=".json" onchange="restoreEvents(event)" style="display: none;">
+            </label>
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" id="themeToggle" onchange="toggleTheme()">
+                <label class="form-check-label" for="themeToggle">Tumma tila</label>
+            </div>
+        </div>
+        <div class="version-text">Versio 0.74 Lassi Hakala 2025</div>
+    </div>
+
+    <!-- New Event Form -->
+    <div id="newEventForm" class="container" style="display: none;">
+        <h2>Luo Uusi Tapahtuma</h2>
+        <form id="eventForm">
+            <div class="mb-3">
+                <label for="location" class="form-label">Sijainti</label>
+                <input type="text" class="form-control" id="location" required>
+            </div>
+            <div class="mb-3">
+                <label for="diveMaster" class="form-label">Sukellusvanhin</label>
+                <input type="text" class="form-control" id="diveMaster" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Luo Tapahtuma</button>
+            <button type="button" class="btn btn-secondary" onclick="showMainView()">Peruuta</button>
+        </form>
+        <div class="version-text">Versio 0.74 Lassi Hakala 2025</div>
+    </div>
+
+    <!-- Event View -->
+    <div id="eventView" class="container" style="display: none;">
+        <h2 id="eventTitle" class="event-header"></h2>
+        <p><strong>Sukellusvanhin:</strong> <span id="eventDiveMaster"></span></p>
+        <p><strong>Päivämäärä:</strong> <span id="eventDate"></span></p>
+        <button class="btn btn-primary mb-3" onclick="showAddDiverForm()">Lisää Sukeltaja</button>
+        <div id="diverList"></div>
+        <button id="endEventBtn" class="btn btn-success mt-3" style="display: none;" onclick="endEvent()">Lopeta Tapahtuma</button>
+        <button id="generatePdfBtn" class="btn btn-info mt-3" style="display: none;" onclick="generatePdf()">Luo PDF</button>
+        <button class="btn btn-secondary mt-3" onclick="showMainView()">Takaisin Päänäkymään</button>
+    </div>
+
+    <!-- Add Diver Form -->
+    <div id="addDiverForm" class="container" style="display: none;">
+        <h2>Lisää Sukeltaja</h2>
+        <form id="diverForm">
+            <div class="mb-3">
+                <label for="diverName" class="form-label">Sukeltajan Nimi</label>
+                <input type="text" class="form-control" id="diverName" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Lisää Sukeltaja</button>
+            <button type="button" class="btn btn-secondary" onclick="showEventView()">Peruuta</button>
+        </form>
+    </div>
+
+    <!-- Diver Details Modal -->
+    <div class="modal fade" id="diverDetailsModal" tabindex="-1" aria-labelledby="diverDetailsModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="diverDetailsModalLabel">Syötä Sukeltajan Tiedot</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="bottleSizeInput" class="form-label">Pullon koko (L)</label>
+                        <input type="number" class="form-control" id="bottleSizeInput" placeholder="Pullon koko (L)" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="pressureInput" class="form-label">Paine (bar)</label>
+                        <input type="number" class="form-control" id="pressureInput" placeholder="Paine (bar)" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="plannedDepthInput" class="form-label required-label">Suunniteltu syvyys (m)</label>
+                        <input type="number" class="form-control" id="plannedDepthInput" placeholder="Suunniteltu syvyys (m)" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="plannedTimeInput" class="form-label required-label">Suunniteltu aika (min)</label>
+                        <input type="number" class="form-control" id="plannedTimeInput" placeholder="Suunniteltu aika (min)" min="0" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label required-label">Kaasu</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="gasType" id="gasAir" value="Ilma" checked>
+                            <label class="form-check-label" for="gasAir">Ilma</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="gasType" id="gasMixed" value="Seoskaasu">
+                            <label class="form-check-label" for="gasMixed">Seoskaasu</label>
+                        </div>
+                        <input type="text" class="form-control mt-2" id="mixedGasInput" placeholder="Syötä seoskaasu (esim. Nitrox 32%)">
+                    </div>
+                    <div class="required-note">* Pakollinen</div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
+                    <button type="button" class="btn btn-primary" onclick="saveDiverDetails()">Tallenna</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Buddy Modal -->
+    <div class="modal fade" id="buddyModal" tabindex="-1" aria-labelledby="buddyModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="buddyModalLabel">Valitse Pari</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="buddyCheckboxes" class="buddy-checkboxes"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
+                    <button type="button" class="btn btn-primary" onclick="saveBuddies()">Tallenna</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notes Modal -->
+    <div class="modal fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notesModalLabel">Syötä Muistiinpanot</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" class="form-control" id="notesInput" placeholder="Muistiinpanot">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
+                    <button type="button" class="btn btn-primary" onclick="saveNotes()">Tallenna</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Post-Dive Data Modal -->
+    <div class="modal fade" id="postDiveModal" tabindex="-1" aria-labelledby="postDiveModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="postDiveModalLabel">Syötä Sukelluksen Jälkeiset Tiedot</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Sulje"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="finalPressureInput" class="form-label">Loppu Paine (bar)</label>
+                        <input type="number" class="form-control" id="finalPressureInput" placeholder="Loppu Paine (bar)" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="maxDepthInput" class="form-label">Maksimi syvyys (m)</label>
+                        <input type="number" class="form-control" id="maxDepthInput" placeholder="Maksimi syvyys (m)" min="0">
+                    </div>
+                    <div class="mb-3">
+                        <label for="averageDepthInput" class="form-label">Keskisyvyys (m)</label>
+                        <input type="number" class="form-control" id="averageDepthInput" placeholder="Keskisyvyys (m)" min="0">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Peruuta</button>
+                    <button type="button" class="btn btn-primary" onclick="savePostDiveDetails()">Tallenna</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        let events = JSON.parse(localStorage.getItem('diveEvents')) || [];
+        let currentEventId = null;
+        let timers = {};
+        let currentDiverId = null;
+
+        // Theme handling
+        function loadTheme() {
+            console.log('Loading theme');
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.setAttribute('data-theme', savedTheme);
+            document.getElementById('themeToggle').checked = savedTheme === 'dark';
+        }
+
+        function toggleTheme() {
+            console.log('Toggling theme');
+            const theme = document.getElementById('themeToggle').checked ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('theme', theme);
+            loadEvents();
+            if (currentEventId) loadEventDetails();
+        }
+
+        // Backup events to a JSON file
+        function backupEvents() {
+            console.log('Backing up events');
+            const data = JSON.stringify(events, null, 2);
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'sukelluspöytäkirja_backup.json';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            console.log('Backup completed');
+        }
+
+        // Restore events from a JSON file
+        function restoreEvents(event) {
+            console.log('Restoring events');
+            const file = event.target.files[0];
+            if (!file) {
+                console.error('No file selected');
+                alert('Valitse JSON-tiedosto palauttaaksesi tapahtumat.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const restoredEvents = JSON.parse(e.target.result);
+                    if (!Array.isArray(restoredEvents)) {
+                        throw new Error('Invalid JSON format: Not an array');
+                    }
+                    for (const evt of restoredEvents) {
+                        if (!evt.id || !evt.location || !evt.diveMaster || !evt.date || !Array.isArray(evt.divers)) {
+                            throw new Error('Invalid event structure');
+                        }
+                    }
+                    events = restoredEvents;
+                    localStorage.setItem('diveEvents', JSON.stringify(events));
+                    loadEvents();
+                    console.log('Events restored successfully');
+                    alert('Tapahtumat palautettu onnistuneesti.');
+                } catch (error) {
+                    console.error('Error restoring events:', error);
+                    alert('Virhe palautettaessa tapahtumia: ' + error.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        // Show main view
+        function showMainView() {
+            console.log('Showing main view');
+            const mainView = document.getElementById('mainView');
+            const newEventForm = document.getElementById('newEventForm');
+            const eventView = document.getElementById('eventView');
+            const addDiverForm = document.getElementById('addDiverForm');
+            if (mainView && newEventForm && eventView && addDiverForm) {
+                mainView.style.display = 'block';
+                newEventForm.style.display = 'none';
+                eventView.style.display = 'none';
+                addDiverForm.style.display = 'none';
+                loadEvents();
+            } else {
+                console.error('Main view elements not found:', { mainView, newEventForm, eventView, addDiverForm });
+                alert('Virhe: Sovelluksen näkymiä ei löydy. Tarkista HTML-rakenne.');
+            }
+        }
+
+        // Show new event form
+        function showNewEventForm() {
+            console.log('Showing new event form');
+            const mainView = document.getElementById('mainView');
+            const newEventForm = document.getElementById('newEventForm');
+            const eventView = document.getElementById('eventView');
+            const addDiverForm = document.getElementById('addDiverForm');
+            if (mainView && newEventForm && eventView && addDiverForm) {
+                mainView.style.display = 'none';
+                newEventForm.style.display = 'block';
+                eventView.style.display = 'none';
+                addDiverForm.style.display = 'none';
+            } else {
+                console.error('New event form elements not found:', { mainView, newEventForm, eventView, addDiverForm });
+                alert('Virhe: Uuden tapahtuman lomaketta ei löydy. Tarkista HTML-rakenne.');
+            }
+        }
+
+        // Show event view
+        function showEventView() {
+            console.log('Showing event view for event ID:', currentEventId);
+            const mainView = document.getElementById('mainView');
+            const newEventForm = document.getElementById('newEventForm');
+            const eventView = document.getElementById('eventView');
+            const addDiverForm = document.getElementById('addDiverForm');
+            if (mainView && newEventForm && eventView && addDiverForm) {
+                mainView.style.display = 'none';
+                newEventForm.style.display = 'none';
+                eventView.style.display = 'block';
+                addDiverForm.style.display = 'none';
+                loadEventDetails();
+            } else {
+                console.error('Event view elements not found:', { mainView, newEventForm, eventView, addDiverForm });
+                alert('Virhe: Tapahtumanäkymää ei löydy. Tarkista HTML-rakenne.');
+            }
+        }
+
+        // Show add diver form
+        function showAddDiverForm() {
+            console.log('Showing add diver form');
+            const eventView = document.getElementById('eventView');
+            const addDiverForm = document.getElementById('addDiverForm');
+            if (eventView && addDiverForm) {
+                eventView.style.display = 'none';
+                addDiverForm.style.display = 'block';
+            } else {
+                console.error('Add diver form elements not found:', { eventView, addDiverForm });
+                alert('Virhe: Sukeltajan lisäyslomaketta ei löydy. Tarkista HTML-rakenne.');
+            }
+        }
+
+        // Load events in main view
+        function loadEvents() {
+            console.log('Loading events:', events);
+            const eventList = document.getElementById('eventList');
+            if (eventList) {
+                eventList.innerHTML = '';
+                events.forEach(event => {
+                    const li = document.createElement('li');
+                    li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                    li.innerHTML = `${event.location} - ${event.date} - ${event.diveMaster}
+                        <span>
+                            <button class="btn btn-sm btn-primary" onclick="openEvent('${event.id}')">Avaa</button>
+                            <span class="trash-icon" onclick="confirmDeleteEvent('${event.id}')">🗑️</span>
+                        </span>`;
+                    eventList.appendChild(li);
+                });
+            } else {
+                console.error('Event list element not found');
+                alert('Virhe: Tapahtumalistaa ei löydy. Tarkista HTML-rakenne.');
+            }
+        }
+
+        // Confirm event deletion
+        function confirmDeleteEvent(eventId) {
+            console.log('Confirming deletion of event:', eventId);
+            if (confirm('Haluatko varmasti poistaa tämän tapahtuman?')) {
+                events = events.filter(event => event.id !== eventId);
+                localStorage.setItem('diveEvents', JSON.stringify(events));
+                loadEvents();
+            }
+        }
+
+        // Create new event
+        document.getElementById('eventForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Creating new event');
+            const location = document.getElementById('location').value;
+            const diveMaster = document.getElementById('diveMaster').value;
+            const event = {
+                id: Date.now().toString(),
+                location,
+                diveMaster,
+                date: new Date().toLocaleDateString('fi-FI'),
+                divers: [],
+                ended: false
+            };
+            events.push(event);
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            currentEventId = event.id;
+            showEventView();
+        });
+
+        // Open an event
+        function openEvent(eventId) {
+            console.log('Opening event:', eventId);
+            currentEventId = eventId;
+            showEventView();
+        }
+
+        // Confirm diver deletion
+        function confirmDeleteDiver(diverId) {
+            console.log('Confirming deletion of diver:', diverId);
+            if (confirm('Haluatko varmasti poistaa tämän sukeltajan?')) {
+                const event = events.find(e => e.id === currentEventId);
+                event.divers = event.divers.filter(diver => {
+                    if (diver.id === diverId) {
+                        if (timers[diverId]) {
+                            clearInterval(timers[diverId]);
+                            delete timers[diverId];
+                        }
+                        return false;
+                    }
+                    if (diver.buddies.includes(diverId)) {
+                        diver.buddies = diver.buddies.filter(id => id !== diverId);
+                    }
+                    return true;
+                });
+                localStorage.setItem('diveEvents', JSON.stringify(events));
+                loadEventDetails();
+            }
+        }
+
+        // Open diver details modal
+        function openDiverDetailsModal(diverId) {
+            console.log('Opening diver details modal for diver:', diverId);
+            currentDiverId = diverId;
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            document.getElementById('bottleSizeInput').value = diver.bottleSize || '';
+            document.getElementById('pressureInput').value = diver.pressure || '';
+            document.getElementById('plannedDepthInput').value = diver.plannedDepth || '';
+            document.getElementById('plannedTimeInput').value = diver.plannedTime || '';
+            document.getElementById('gasAir').checked = diver.gas === 'Ilma' || !diver.gas;
+            document.getElementById('gasMixed').checked = diver.gas && diver.gas !== 'Ilma';
+            document.getElementById('mixedGasInput').value = diver.gas && diver.gas !== 'Ilma' ? diver.gas : '';
+            document.getElementById('mixedGasInput').style.display = document.getElementById('gasMixed').checked ? 'block' : 'none';
+            const modal = new bootstrap.Modal(document.getElementById('diverDetailsModal'));
+            modal.show();
+        }
+
+        // Toggle mixed gas input visibility
+        document.addEventListener('change', function(e) {
+            if (e.target.name === 'gasType') {
+                console.log('Gas type changed to:', e.target.value);
+                document.getElementById('mixedGasInput').style.display = e.target.value === 'Seoskaasu' ? 'block' : 'none';
+            }
+        });
+
+        // Save diver details
+        function saveDiverDetails() {
+            console.log('Saving diver details for diver:', currentDiverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === currentDiverId);
+            diver.bottleSize = document.getElementById('bottleSizeInput').value;
+            diver.pressure = document.getElementById('pressureInput').value;
+            diver.plannedDepth = document.getElementById('plannedDepthInput').value;
+            diver.plannedTime = document.getElementById('plannedTimeInput').value;
+            diver.timeLeft = parseInt(diver.plannedTime) || 0;
+            const gasType = document.querySelector('input[name="gasType"]:checked').value;
+            diver.gas = gasType === 'Ilma' ? 'Ilma' : document.getElementById('mixedGasInput').value || 'Seoskaasu';
+            console.log('Saved diver details:', diver);
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            const modal = bootstrap.Modal.getInstance(document.getElementById('diverDetailsModal'));
+            modal.hide();
+            loadEventDetails();
+        }
+
+        // Open buddy modal
+        function openBuddyModal(diverId) {
+            console.log('Opening buddy modal for diver:', diverId);
+            currentDiverId = diverId;
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            const buddyCheckboxes = document.getElementById('buddyCheckboxes');
+            buddyCheckboxes.innerHTML = event.divers.map(d => d.id !== diverId ? `
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input buddy-checkbox" data-buddy-id="${d.id}" ${diver.buddies.includes(d.id) ? 'checked' : ''}>
+                    <label class="form-check-label">${d.name}</label>
+                </div>
+            ` : '').join('');
+            const modal = new bootstrap.Modal(document.getElementById('buddyModal'));
+            modal.show();
+        }
+
+        // Save buddies
+        function saveBuddies() {
+            console.log('Saving buddies for diver:', currentDiverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === currentDiverId);
+            if (!diver) {
+                console.error('Current diver not found:', currentDiverId);
+                alert('Virhe: Sukeltajaa ei löydy.');
+                return;
+            }
+
+            const checkboxes = document.querySelectorAll('#buddyCheckboxes .buddy-checkbox');
+            const newBuddies = Array.from(checkboxes)
+                .filter(cb => cb.checked)
+                .map(cb => cb.dataset.buddyId);
+
+            // Convert current diver's plannedDepth and plannedTime to numbers for validation
+            const diverDepth = !isNaN(parseFloat(diver.plannedDepth)) && parseFloat(diver.plannedDepth) > 0 ? parseFloat(diver.plannedDepth) : null;
+            const diverTime = !isNaN(parseInt(diver.plannedTime, 10)) && parseInt(diver.plannedTime, 10) > 0 ? parseInt(diver.plannedTime, 10) : null;
+            console.log(`Current diver (${diver.name}) depth: ${diverDepth}, time: ${diverTime}, raw values:`, { plannedDepth: diver.plannedDepth, plannedTime: diver.plannedTime });
+
+            // Initialize buddy assignments
+            diver.buddies = newBuddies;
+            console.log(`Updated ${diver.name}'s buddies:`, newBuddies.map(id => event.divers.find(d => d.id === id)?.name || id));
+
+            // Handle all buddy assignments and copying in a single loop
+            const group = newBuddies.length >= 2 ? [currentDiverId, ...newBuddies] : null;
+            if (group) {
+                console.log('Group detected:', group.map(id => event.divers.find(d => d.id === id)?.name || id));
+            }
+
+            event.divers.forEach(d => {
+                if (d.id !== currentDiverId) {
+                    // Mutual buddy assignment
+                    if (newBuddies.includes(d.id)) {
+                        if (!d.buddies.includes(currentDiverId)) {
+                            d.buddies.push(currentDiverId);
+                            console.log(`Added ${diver.name} to ${d.name}'s buddies`);
+                        }
+                    } else {
+                        d.buddies = d.buddies.filter(buddyId => buddyId !== currentDiverId);
+                        console.log(`Removed ${diver.name} from ${d.name}'s buddies`);
+                    }
+
+                    // Handle group buddy consistency
+                    if (group && group.includes(d.id)) {
+                        const groupBuddies = group.filter(id => id !== d.id);
+                        d.buddies = groupBuddies;
+                        console.log(`Updated ${d.name}'s buddies to group:`, groupBuddies.map(id => event.divers.find(d => d.id === id)?.name || id));
+                    }
+
+                    // Copy planned depth and time to buddy if empty and current diver has valid values
+                    if (newBuddies.includes(d.id) || (group && group.includes(d.id))) {
+                        console.log(`Checking copy for ${d.name}:`, { plannedDepth: d.plannedDepth, plannedTime: d.plannedTime, timeLeft: d.timeLeft });
+                        if ((!d.plannedDepth || d.plannedDepth.trim() === "") && diverDepth !== null) {
+                            d.plannedDepth = diverDepth.toString();
+                            console.log(`Copied planned depth ${diverDepth} m to ${d.name}`);
+                        } else if (d.plannedDepth) {
+                            console.log(`Skipped copying depth to ${d.name}: already set to ${d.plannedDepth}`);
+                        } else {
+                            console.log(`Skipped copying depth to ${d.name}: source depth invalid (${diverDepth})`);
+                        }
+
+                        if ((!d.plannedTime || d.plannedTime.trim() === "") && diverTime !== null) {
+                            d.plannedTime = diverTime.toString();
+                            d.timeLeft = diverTime;
+                            console.log(`Copied planned time ${diverTime} min to ${d.name}, updated timeLeft: ${d.timeLeft}`);
+                        } else if (d.plannedTime) {
+                            console.log(`Skipped copying time to ${d.name}: already set to ${d.plannedTime}`);
+                        } else {
+                            console.log(`Skipped copying time to ${d.name}: source time invalid (${diverTime})`);
+                        }
+                    }
+                }
+            });
+
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            console.log('Updated divers after buddy save:', event.divers.map(d => ({
+                name: d.name,
+                plannedDepth: d.plannedDepth,
+                plannedTime: d.plannedTime,
+                timeLeft: d.timeLeft,
+                buddies: d.buddies.map(id => event.divers.find(div => div.id === id)?.name || id)
+            })));
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('buddyModal'));
+            modal.hide();
+            loadEventDetails();
+        }
+
+        // Open notes modal
+        function openNotesModal(diverId) {
+            console.log('Opening notes modal for diver:', diverId);
+            currentDiverId = diverId;
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            document.getElementById('notesInput').value = diver.notes || '';
+            const modal = new bootstrap.Modal(document.getElementById('notesModal'));
+            modal.show();
+        }
+
+        // Save notes
+        function saveNotes() {
+            console.log('Saving notes for diver:', currentDiverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === currentDiverId);
+            diver.notes = document.getElementById('notesInput').value;
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            const modal = bootstrap.Modal.getInstance(document.getElementById('notesModal'));
+            modal.hide();
+            loadEventDetails();
+        }
+
+        // Open post-dive data modal
+        function openPostDiveModal(diverId) {
+            console.log('Opening post-dive data modal for diver:', diverId);
+            currentDiverId = diverId;
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            document.getElementById('finalPressureInput').value = diver.finalPressure || '';
+            document.getElementById('maxDepthInput').value = diver.maxDepth || '';
+            document.getElementById('averageDepthInput').value = diver.averageDepth || '';
+            const modal = new bootstrap.Modal(document.getElementById('postDiveModal'));
+            modal.show();
+        }
+
+        // Save post-dive data
+        function savePostDiveDetails() {
+            console.log('Saving post-dive details for diver:', currentDiverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === currentDiverId);
+            const finalPressure = document.getElementById('finalPressureInput').value;
+            const maxDepth = document.getElementById('maxDepthInput').value;
+            const averageDepth = document.getElementById('averageDepthInput').value;
+
+            diver.finalPressure = finalPressure;
+            diver.maxDepth = maxDepth;
+            diver.averageDepth = averageDepth;
+
+            // Calculate air consumption (L)
+            if (diver.pressure && finalPressure && diver.bottleSize) {
+                const usedPressure = parseFloat(diver.pressure) - parseFloat(finalPressure);
+                diver.airConsumption = usedPressure * parseFloat(diver.bottleSize);
+            } else {
+                diver.airConsumption = '';
+            }
+
+            // Calculate air consumption per minute at surface (l/min)
+            if (diver.airConsumption && averageDepth && diver.diveTime) {
+                const diveTimeMinutes = diver.diveTime / 60;
+                const pressureCorrection = 10 / (10 + parseFloat(averageDepth));
+                diver.airConsumptionPerMin = ((diver.airConsumption / diveTimeMinutes) * pressureCorrection).toFixed(2);
+            } else {
+                diver.airConsumptionPerMin = '';
+            }
+
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            const modal = bootstrap.Modal.getInstance(document.getElementById('postDiveModal'));
+            modal.hide();
+            loadEventDetails();
+        }
+
+        // Load event details
+        function loadEventDetails() {
+            console.log('Loading event details for event ID:', currentEventId);
+            const event = events.find(e => e.id === currentEventId);
+            if (!event) {
+                console.error('Event not found:', currentEventId);
+                alert('Virhe: Tapahtumaa ei löydy. Palataan päänäkymään.');
+                showMainView();
+                return;
+            }
+            document.getElementById('eventTitle').textContent = event.location;
+            document.getElementById('eventDiveMaster').textContent = event.diveMaster;
+            document.getElementById('eventDate').textContent = event.date;
+            const diverList = document.getElementById('diverList');
+            if (diverList) {
+                diverList.innerHTML = '';
+
+                // Add header row
+                const headerDiv = document.createElement('div');
+                headerDiv.className = 'row align-items-center font-weight-bold mb-2';
+                headerDiv.innerHTML = `
+                    <div class="col-md-3">Nimi</div>
+                    <div class="col-md-1">Pullon koko</div>
+                    <div class="col-md-1">Paine</div>
+                    <div class="col-md-1">Kaasu</div>
+                    <div class="col-md-1">Suunniteltu aika</div>
+                    <div class="col-md-1">Suunniteltu syvyys</div>
+                    <div class="col-md-2">Pari</div>
+                    <div class="col-md-2">Muistiinpanot</div>
+                    <div class="col-md-1">Aloitus</div>
+                    <div class="col-md-1">Aika</div>
+                `;
+                diverList.appendChild(headerDiv);
+
+                // List divers in order of addition
+                event.divers.forEach((diver, index) => {
+                    const buddyNames = diver.buddies.map(buddyId => event.divers.find(d => d.id === buddyId)?.name || '').filter(name => name).join(', ') || 'Ei paria';
+                    // Calculate diveTime and timeLeft based on real time
+                    let diveTime = diver.diveTime;
+                    let timeLeft = diver.timeLeft;
+                    if (diver.diveStarted && !diver.diveEnded && !diver.paused) {
+                        const now = Date.now();
+                        const totalPausedTime = diver.totalPausedTime || 0;
+                        diveTime = Math.floor((now - diver.startTimestamp - totalPausedTime) / 1000); // Seconds since start
+                        timeLeft = parseInt(diver.plannedTime) - Math.floor(diveTime / 60); // Minutes remaining
+                        diver.diveTime = diveTime;
+                        diver.timeLeft = timeLeft;
+                        localStorage.setItem('diveEvents', JSON.stringify(events));
+                    }
+                    const div = document.createElement('div');
+                    div.className = 'diver-row';
+                    div.innerHTML = `
+                        <div class="row align-items-center">
+                            <div class="col-md-3">
+                                <span class="diver-name">${diver.name}</span>
+                                <div class="action-buttons">
+                                    ${diver.diveStarted && !diver.diveEnded ? `
+                                        ${diver.paused ? `
+                                            <span class="resume-icon" onclick="resumeDive('${diver.id}')" aria-label="Jatka sukellus">▶️</span>
+                                            <span class="stop-icon" onclick="stopDive('${diver.id}')" aria-label="Lopeta sukellus">⏹️</span>
+                                        ` : `
+                                            <span class="pause-icon" onclick="pauseDive('${diver.id}')" aria-label="Keskeytä sukellus">⏸️</span>
+                                            <span class="stop-icon" onclick="stopDive('${diver.id}')" aria-label="Lopeta sukellus">⏹️</span>
+                                        `}
+                                    ` : diver.diveEnded ? `
+                                        <span class="surface-text">Pinnalla</span>
+                                    ` : `
+                                        ${isDiverReady(diver) ? `<span class="play-icon" onclick="startDive('${diver.id}')" aria-label="Aloita sukellus">▶️</span>` : ''}
+                                        <span class="trash-icon" onclick="confirmDeleteDiver('${diver.id}')" aria-label="Poista sukeltaja">🗑️</span>
+                                    `}
+                                </div>
+                            </div>
+                            <div class="col-md-1">
+                                ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.bottleSize ? `${diver.bottleSize} L` : 'Syötä tiedot'}</span>` : `<span>${diver.bottleSize ? `${diver.bottleSize} L` : ''}</span>`}
+                            </div>
+                            <div class="col-md-1">
+                                ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.pressure ? `${diver.pressure} bar` : ''}</span>` : `<span>${diver.pressure ? `${diver.pressure} bar` : ''}</span>`}
+                            </div>
+                            <div class="col-md-1">
+                                ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.gas ? diver.gas : 'Syötä tiedot'}</span>` : `<span>${diver.gas || ''}</span>`}
+                            </div>
+                            <div class="col-md-1">
+                                ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.plannedTime ? `${diver.plannedTime} min` : 'Syötä tiedot'}</span>` : `<span>${diver.plannedTime ? `${diver.plannedTime} min` : ''}</span>`}
+                            </div>
+                            <div class="col-md-1">
+                                ${!diver.diveStarted ? `<span class="input-span" onclick="openDiverDetailsModal('${diver.id}')">${diver.plannedDepth ? `${diver.plannedDepth} m` : 'Syötä tiedot'}</span>` : `<span>${diver.plannedDepth ? `${diver.plannedDepth} m` : ''}</span>`}
+                            </div>
+                            <div class="col-md-2">
+                                ${!diver.diveStarted ? `<span class="input-span" onclick="openBuddyModal('${diver.id}')">${buddyNames}</span>` : `<span>${buddyNames}</span>`}
+                            </div>
+                            <div class="col-md-2">
+                                <span class="input-span" onclick="openNotesModal('${diver.id}')">${diver.notes || 'Ei muistiinpanoja'}</span>
+                            </div>
+                            <div class="col-md-1">
+                                ${diver.diveStarted ? `<span class="clock-time">${diver.startTime || ''}${diver.diveEnded ? `<br>${diver.endTime || ''}` : ''}</span>` : ''}
+                            </div>
+                            <div class="col-md-1">
+                                ${diver.diveStarted || diver.diveEnded ? `
+                                    <span class="dive-time ${timeLeft <= 5 && !diver.diveEnded ? 'dive-time-warning' : ''} ${timeLeft <= 0 && !diver.diveEnded ? 'dive-time-over' : ''}" id="diveTime_${diver.id}">
+                                        ${formatTime(diveTime)}${diver.diveStarted && !diver.diveEnded ? ` (${formatTime(timeLeft * 60)})` : ''}
+                                    </span>
+                                ` : ''}
+                            </div>
+                            <div class="col-md-1">
+                                ${diver.diveEnded ? `<span class="input-span post-dive-data" onclick="openPostDiveModal('${diver.id}')">${diver.finalPressure ? `${diver.finalPressure} bar` : 'Syötä tiedot'}</span>` : ''}
+                            </div>
+                            <div class="col-md-1">
+                                ${diver.airConsumption ? `<span class="post-dive-data">${diver.airConsumption} L</span>` : ''}
+                            </div>
+                            <div class="col-md-1">
+                                ${diver.diveEnded ? `<span class="input-span post-dive-data" onclick="openPostDiveModal('${diver.id}')">${diver.maxDepth ? `${diver.maxDepth} m` : 'Syötä tiedot'}</span>` : ''}
+                            </div>
+                            <div class="col-md-1">
+                                ${diver.diveEnded ? `<span class="input-span post-dive-data" onclick="openPostDiveModal('${diver.id}')">${diver.averageDepth ? `${diver.averageDepth} m` : 'Syötä tiedot'}</span>` : ''}
+                            </div>
+                            <div class="col-md-1">
+                                ${diver.airConsumptionPerMin ? `<span class="post-dive-data">${diver.airConsumptionPerMin} l/min</span>` : ''}
+                            </div>
+                        </div>`;
+                    diverList.appendChild(div);
+                    if (index < event.divers.length - 1) {
+                        const hr = document.createElement('hr');
+                        hr.className = 'diver-divider';
+                        diverList.appendChild(hr);
+                    }
+                });
+
+                document.getElementById('endEventBtn').style.display = event.divers.every(d => d.diveEnded) && !event.ended ? 'inline-block' : 'none';
+                document.getElementById('generatePdfBtn').style.display = event.ended ? 'inline-block' : 'none';
+            } else {
+                console.error('Diver list element not found');
+                alert('Virhe: Sukeltajalistaa ei löydy. Tarkista HTML-rakenne.');
+            }
+        }
+
+        // Check if diver is ready to start
+        function isDiverReady(diver) {
+            const ready = diver.plannedTime && diver.plannedDepth && diver.gas;
+            console.log('Checking if diver is ready:', diver.id, { plannedTime: diver.plannedTime, plannedDepth: diver.plannedDepth, gas: diver.gas, ready });
+            return ready;
+        }
+
+        // Add diver
+        document.getElementById('diverForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            console.log('Adding new diver');
+            const event = events.find(e => e.id === currentEventId);
+            const diver = {
+                id: Date.now().toString(),
+                name: document.getElementById('diverName').value,
+                bottleSize: '',
+                pressure: '',
+                gas: '',
+                plannedTime: '',
+                plannedDepth: '',
+                buddies: [],
+                notes: '',
+                diveStarted: false,
+                diveEnded: false,
+                diveTime: 0,
+                timeLeft: 0,
+                paused: false,
+                pauseTimestamp: null,
+                totalPausedTime: 0,
+                startTimestamp: null,
+                startTime: '',
+                endTime: '',
+                finalPressure: '',
+                airConsumption: '',
+                maxDepth: '',
+                averageDepth: '',
+                airConsumptionPerMin: ''
+            };
+            event.divers.push(diver);
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            showEventView();
+        });
+
+        // Start dive
+        function startDive(diverId) {
+            console.log('Starting dive for diver:', diverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            if (!isDiverReady(diver)) {
+                console.error('Diver not ready to start:', diver);
+                alert('Syötä suunniteltu aika, syvyys ja kaasu ennen sukelluksen aloitusta.');
+                return;
+            }
+            diver.diveStarted = true;
+            diver.startTimestamp = Date.now();
+            diver.startTime = new Date().toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' });
+            diver.diveTime = 0;
+            diver.timeLeft = parseInt(diver.plannedTime);
+            timers[diverId] = setInterval(() => {
+                if (!diver.paused && !diver.diveEnded) {
+                    loadEventDetails(); // Update display based on real-time calculation
+                }
+            }, 1000);
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            loadEventDetails();
+        }
+
+        // Pause dive
+        function pauseDive(diverId) {
+            console.log('Pausing dive for diver:', diverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            diver.paused = true;
+            diver.pauseTimestamp = Date.now();
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            loadEventDetails();
+        }
+
+        // Resume dive
+        function resumeDive(diverId) {
+            console.log('Resuming dive for diver:', diverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            diver.paused = false;
+            diver.totalPausedTime += Date.now() - diver.pauseTimestamp;
+            diver.pauseTimestamp = null;
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            loadEventDetails();
+        }
+
+        // Stop dive
+        function stopDive(diverId) {
+            console.log('Stopping dive for diver:', diverId);
+            const event = events.find(e => e.id === currentEventId);
+            const diver = event.divers.find(d => d.id === diverId);
+            if (confirm(`Haluatko varmasti päättää sukelluksen sukeltajalle ${diver.name}?`)) {
+                clearInterval(timers[diverId]);
+                delete timers[diverId];
+                diver.diveEnded = true;
+                diver.paused = false;
+                const now = Date.now();
+                diver.endTime = new Date().toLocaleTimeString('fi-FI', { hour: '2-digit', minute: '2-digit' });
+                const totalPausedTime = diver.totalPausedTime || 0;
+                diver.diveTime = Math.floor((now - diver.startTimestamp - totalPausedTime) / 1000); // Final dive time in seconds
+                diver.timeLeft = parseInt(diver.plannedTime) - Math.floor(diver.diveTime / 60); // Final time left
+                diver.pauseTimestamp = null;
+                diver.totalPausedTime = 0;
+                localStorage.setItem('diveEvents', JSON.stringify(events));
+                loadEventDetails();
+            }
+        }
+
+        // End event
+        function endEvent() {
+            console.log('Ending event:', currentEventId);
+            const event = events.find(e => e.id === currentEventId);
+            event.ended = true;
+            localStorage.setItem('diveEvents', JSON.stringify(events));
+            loadEventDetails();
+        }
+
+        // Format time (seconds to min:sec)
+        function formatTime(seconds) {
+            const min = Math.floor(seconds / 60);
+            const sec = seconds % 60;
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        // Generate PDF
+        function generatePdf() {
+            console.log('Generating PDF for event:', currentEventId);
+            try {
+                const { jsPDF } = window.jspdf;
+                if (!jsPDF) {
+                    throw new Error('jsPDF library not loaded');
+                }
+                const doc = new jsPDF({ orientation: 'portrait' });
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const maxLineWidth = pageWidth - 30;
+
+                const event = events.find(e => e.id === currentEventId);
+                if (!event) {
+                    throw new Error('Event not found for ID: ' + currentEventId);
+                }
+
+                doc.setFontSize(16);
+                doc.text(`Sukelluspöytäkirja: ${event.location}`, 10, 10);
+                doc.setFontSize(12);
+                doc.text(`Sukellusvanhin: ${event.diveMaster}`, 10, 20);
+                doc.text(`Päivämäärä: ${event.date}`, 10, 30);
+                doc.text('Sukeltajat:', 10, 40);
+
+                let y = 50;
+                event.divers.forEach(diver => {
+                    const buddyNames = diver.buddies.map(buddyId => event.divers.find(d => d.id === buddyId)?.name || '').filter(name => name).join(', ') || 'Ei paria';
+                    doc.setFontSize(18);
+                    doc.setFont('helvetica', 'bold');
+                    doc.text(`${diver.name || 'Nimetön'}`, 10, y);
+                    doc.setFontSize(12);
+                    doc.setFont('helvetica', 'normal');
+                    y += 7;
+                    const plannedText = `Pullon koko: ${diver.bottleSize || '-'} L, Paine ennen: ${diver.pressure || '-'} bar, Kaasu: ${diver.gas || '-'}, Suunniteltu syvyys: ${diver.plannedDepth || '-'} m, Suunniteltu aika: ${diver.plannedTime || '-'} min`;
+                    const plannedLines = doc.splitTextToSize(plannedText, maxLineWidth);
+                    doc.text(plannedLines, 15, y);
+                    y += plannedLines.length * 7;
+                    const actualText = `Aloitusaika: ${diver.startTime || '-'}, Lopetusaika: ${diver.endTime || '-'}, Toteutunut aika: ${formatTime(diver.diveTime || 0)}${diver.diveStarted && !diver.diveEnded ? ` (Jäljellä: ${formatTime(diver.timeLeft * 60)})` : ''}, Muistiinpanot: ${diver.notes || 'Ei muistiinpanoja'}`;
+                    const actualLines = doc.splitTextToSize(actualText, maxLineWidth);
+                    doc.text(actualLines, 15, y);
+                    y += actualLines.length * 7;
+                    const postDiveText = `Käytetty kaasu: ${diver.airConsumption || '-'} L, Maksimi syvyys: ${diver.maxDepth || '-'} m, Keskisyvyys: ${diver.averageDepth || '-'} m, Ilmankulutus pinnalla: ${diver.airConsumptionPerMin || '-'} l/min`;
+                    const postDiveLines = doc.splitTextToSize(postDiveText, maxLineWidth);
+                    doc.text(postDiveLines, 15, y);
+                    y += postDiveLines.length * 7;
+                    if (y > 270) {
+                        doc.addPage();
+                        y = 10;
+                    }
+                });
+
+                doc.save(`${event.location}_Sukelluspöytäkirja.pdf`);
+                console.log('PDF generated successfully');
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Virhe PDF:n luomisessa: ' + error.message);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Initializing application');
+            loadTheme();
+            showMainView();
+
+            // Add event listener for new event button
+            const newEventButton = document.getElementById('newEventButton');
+            if (newEventButton) {
+                newEventButton.addEventListener('click', function() {
+                    console.log('New event button clicked');
+                    showNewEventForm();
+                });
+            } else {
+                console.error('New event button not found');
+                alert('Virhe: Uusi Tapahtuma -painiketta ei löydy. Tarkista HTML-rakenne.');
+            }
+        });
+    </script>
+</body>
+</html>
+
